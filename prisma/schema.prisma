@@ -1,0 +1,39 @@
+generator client {
+    provider = "prisma-client"
+    output   = "./generated/prisma"
+}
+
+// Ne pas mettre l'URL ici avec Prisma 7 - elle est dans prisma.config.ts
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    firstName String
+    lastName  String
+    color     String
+    events    Event[]
+    createdAt DateTime @default(now())
+}
+
+model EventType {
+    id     Int     @id @default(autoincrement())
+    label  String  @unique
+    color  String
+    events Event[]
+}
+
+model Event {
+    id          Int       @id @default(autoincrement())
+    startPeriod String
+    endPeriod   String
+    user        User      @relation(fields: [userId], references: [id])
+    userId      Int
+    eventType   EventType @relation(fields: [eventTypeId], references: [id])
+    eventTypeId Int
+    startDate   DateTime // matin = 08:00 / apres-midi = 13:00 
+    endDate     DateTime // matin = 12:00 / apres-midi = 18:00 
+    note        String?
+    createdAt   DateTime  @default(now())
+}
