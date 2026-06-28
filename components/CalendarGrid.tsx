@@ -27,10 +27,33 @@ export default function CalendarGrid({
     //fetch("/api/events").then(res => res.json()).then(setEvents);
     //fetch("/api/users").then(res => res.json()).then(setUsers);
 
+    let timeoutId: NodeJS.Timeout | undefined;
+    
+    const updateAtMidnight = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      timeoutId = setTimeout(() => {
+        setRefreshConster(prev => prev + 1);
+        updateAtMidnight(); // Rappel récursif pour chaque jour
+      }, timeUntilMidnight);
+    };
+
+    updateAtMidnight();
+
+    // Fallback: mise à jour chaque minute au cas où
     const interval = setInterval(() => {
       setRefreshConster(prev => prev + 1);
     }, 60000);
-    return () => clearInterval(interval);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
   }, [date]);
 
 
