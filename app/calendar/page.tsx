@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CalendarEvent, EventType, User } from '@/lib/types';
+import { CalendarEvent, User, EventType } from "@/lib/types";
 import CalendarGrid from "@/components/CalendarGrid";
 import EventModal from "@/components/EventModal";
 import EditEventModal from "@/components/EditEventModal";
@@ -16,6 +16,7 @@ export default function CalendarPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [targetDate, setTargetDate] = useState<string>("");
+  const [selectedUserId, setSelectedUserId] = useState<string>('all');
 
   const fetchEvents = async () => {
     const res = await fetch("/api/events");
@@ -44,36 +45,13 @@ export default function CalendarPage() {
 
     void loadData();
 
-    let timeoutId: NodeJS.Timeout | undefined;
-    
-    const updateAtMidnight = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-      
-      timeoutId = setTimeout(() => {
-        setCurrentDate(new Date());
-        updateAtMidnight(); // Rappel récursif pour chaque jour
-      }, timeUntilMidnight);
-    };
-
-    updateAtMidnight();
-
-    // Fallback: mise à jour chaque minute au cas où
     const interval = setInterval(() => {
       const now = new Date();
       if (now.getDate() !== currentDate.getDate()) {
         setCurrentDate(new Date());
       }
     }, 60000);
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [currentDate]);
 
   // Navigation unifiée
@@ -91,10 +69,18 @@ export default function CalendarPage() {
   const formatDateKey = currentDate.toISOString().split('T')[0];
   const absentUserIds = events
     .filter(e => formatDateKey >= e.startDate.split('T')[0] && formatDateKey <= e.endDate.split('T')[0])
-    .map(e => e.userId);
+    .filter(e => e.user)
+    .map(e => e.user!.id);
 
-  const usersPresent = users.filter(u => !absentUserIds.includes(u.id));
-  const usersAbsent = users.filter(u => absentUserIds.includes(u.id));
+  let usersPresent = users.filter(u => !absentUserIds.includes(u.id));
+  let usersAbsent = users.filter(u => absentUserIds.includes(u.id));
+
+  // Filtrer par utilisateur sélectionné si ce n'est pas "tous"
+  if (selectedUserId !== 'all') {
+    const selectedId = Number(selectedUserId);
+    usersPresent = usersPresent.filter(u => u.id === selectedId);
+    usersAbsent = usersAbsent.filter(u => u.id === selectedId);
+  }
 
   return (
     <div className="p-2 md:p-5 w-full max-w-auto mx-auto">
@@ -130,6 +116,8 @@ export default function CalendarPage() {
           onViewChange={setView}
           onEditEvent={(event: CalendarEvent) => { setSelectedEvent(event); setShowEditModal(true); }}
           onDayClick={(dateStr: string) => { setTargetDate(dateStr); setShowAddModal(true); }}
+          onUserChange={setSelectedUserId}
+          users={users}
         />
       </div>
       {/* SECTION LÉGENDES ET ÉTAT ÉQUIPE */}

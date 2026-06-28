@@ -9,6 +9,8 @@ export default function CalendarGrid({
   onViewChange,
   onEditEvent,
   onDayClick,
+  onUserChange,
+  users,
 }: {
   date: Date;
   events: CalendarEvent[];
@@ -16,9 +18,10 @@ export default function CalendarGrid({
   onViewChange: (view: 'month' | 'week') => void;
   onEditEvent: (event: CalendarEvent) => void;
   onDayClick: (dateStr: string) => void;
+  onUserChange?: (userId: string) => void;
+  users: User[];
 }) {
   //const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [users] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [, setRefreshConster] = useState(0);
 
@@ -58,7 +61,7 @@ export default function CalendarGrid({
 
 
   const filteredEvents = events.filter(e =>
-    selectedUserId === 'all' || e.userId === Number(selectedUserId)
+    selectedUserId === 'all' || e.user?.id === Number(selectedUserId)
   );
 
 
@@ -101,7 +104,10 @@ export default function CalendarGrid({
           <button onClick={() => onViewChange('month')} className={`px-4 py-1 rounded ${view === 'month' ? 'bg-blue-500 text-white' : ''}`}>Mois</button>
           <button onClick={() => onViewChange('week')} className={`px-4 py-1 rounded ${view === 'week' ? 'bg-blue-500 text-white' : ''}`}>Semaine</button>
         </div>
-        <select className="border p-2 rounded" value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}
+        <select className="border p-2 rounded" value={selectedUserId} onChange={(e) => {
+          setSelectedUserId(e.target.value);
+          onUserChange?.(e.target.value);
+        }}
           style={{
             color: selectedUserId != 'all' ? selectedUserColor : undefined,
             borderWidth: "3px"
@@ -168,16 +174,12 @@ function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName
         {day}
       </div>
 
-      <div className="grid grid-rows-2 h-full flex-1 space-y-0.5 overflow-x-auto">
-        <div className="border-b border-dashed border-black-900 overflow-y-auto">
+        <div className="grid grid-rows-2 h-full flex-1 space-y-0.5 overflow-y-auto">
+        <div className="border-b border-dashed border-black-900">
           {events.filter((e: CalendarEvent) => {
             const start = e.startDate.split('T')[0];
             const end = e.endDate.split('T')[0];
-            return (
-              (dateStr > start && dateStr < end) ||
-              (dateStr === start && e.startPeriod === 'morning') ||
-              (dateStr === end && e.endPeriod === 'morning')
-            );
+            return (dateStr > start && dateStr < end) || (dateStr === start && e.startPeriod === 'morning') || (dateStr === end && e.endPeriod === 'morning') || (dateStr === end && e.endPeriod === 'afternoon')
           })
             .sort(sortByLastName)
             .map((e: CalendarEvent) => (
@@ -196,12 +198,7 @@ function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName
           {events.filter((e: CalendarEvent) => {
             const start = e.startDate.split('T')[0];
             const end = e.endDate.split('T')[0];
-            return (
-              (dateStr > start && dateStr < end) ||
-              (dateStr === start && e.startPeriod === 'afternoon') ||
-              (dateStr === end && e.endPeriod === 'afternoon') ||
-              (dateStr === start && dateStr === end && e.startPeriod === 'morning' && e.endPeriod === 'afternoon')
-            );
+            return (dateStr === start && dateStr < end) || (dateStr > start && dateStr < end) || (dateStr === start && e.startPeriod === 'afternoon') || (dateStr === end && e.endPeriod === 'afternoon')
           })
             .sort(sortByLastName)
             .map((e: CalendarEvent) => (

@@ -24,17 +24,23 @@ export type EventFormData = {
 };
 
 export type CalendarEvent = {
-  id: number;
-  userId: number;
-  eventTypeId: number;
+    id: number;
   startDate: string;
   endDate: string;
-  startPeriod: Period;
-  endPeriod: Period;
-  note?: string;
-  user: User;
-  eventType: EventType;
-};
+  startPeriod: string;
+  endPeriod: string;
+  user?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    color: string;
+  };
+  eventType?: {
+    id: number;
+    label: string;
+    color: string;
+  }
+}
 
 export type EventTypeStat = {
   eventTypeId: number;
