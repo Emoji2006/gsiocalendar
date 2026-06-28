@@ -44,13 +44,36 @@ export default function CalendarPage() {
 
     void loadData();
 
+    let timeoutId: NodeJS.Timeout | undefined;
+    
+    const updateAtMidnight = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      timeoutId = setTimeout(() => {
+        setCurrentDate(new Date());
+        updateAtMidnight(); // Rappel récursif pour chaque jour
+      }, timeUntilMidnight);
+    };
+
+    updateAtMidnight();
+
+    // Fallback: mise à jour chaque minute au cas où
     const interval = setInterval(() => {
       const now = new Date();
       if (now.getDate() !== currentDate.getDate()) {
         setCurrentDate(new Date());
       }
     }, 60000);
-    return () => clearInterval(interval);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
   }, [currentDate]);
 
   // Navigation unifiée
