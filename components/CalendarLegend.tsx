@@ -1,10 +1,11 @@
 "use client";
-import { EventType } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { CalendarEvent } from "@/types";
 
-export default function CalendarLegend({ types }: { types: EventType[] }) {
+export default function CalendarLegend({ types }: { types: { label: string; color: string }[] }) {
   return (
     <div className="flex gap-4 p-4 text-sm">
-      {types.map((type: EventType) => (
+      {types.map((type: { label: string; color: string }) => (
         <div
           key={type.label}
           className="flex items-center gap-2">

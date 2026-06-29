@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CalendarEvent, User, EventType } from "@/lib/types";
 import CalendarGrid from "@/components/CalendarGrid";
 import EventModal from "@/components/EventModal";
 import EditEventModal from "@/components/EditEventModal";
@@ -8,51 +7,20 @@ import EditEventModal from "@/components/EditEventModal";
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week'>('month');
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [eventTypes, setEventTypes] = useState<any[]>([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [targetDate, setTargetDate] = useState<string>("");
-  const [selectedUserId, setSelectedUserId] = useState<string>('all');
-
-  const fetchEvents = async () => {
-    const res = await fetch("/api/events");
-    const data = await res.json();
-    setEvents(data);
-  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const [eventsRes, usersRes, typesRes] = await Promise.all([
-        fetch("/api/events"),
-        fetch("/api/users"),
-        fetch("/api/event-types"),
-      ]);
-
-      const [eventsData, usersData, eventTypesData] = await Promise.all([
-        eventsRes.json(),
-        usersRes.json(),
-        typesRes.json(),
-      ]);
-
-      setEvents(eventsData);
-      setUsers(usersData);
-      setEventTypes(eventTypesData);
-    };
-
-    void loadData();
-
-    const interval = setInterval(() => {
-      const now = new Date();
-      if (now.getDate() !== currentDate.getDate()) {
-        setCurrentDate(new Date());
-      }
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [currentDate]);
+    fetch("/api/events").then(res => res.json()).then(setEvents);
+    fetch("/api/users").then(res => res.json()).then(setUsers);
+    fetch("/api/event-types").then(res => res.json()).then(setEventTypes);
+  }, []);
 
   // Navigation unifiée
   const changeDate = (direction: number) => {
@@ -69,40 +37,26 @@ export default function CalendarPage() {
   const formatDateKey = currentDate.toISOString().split('T')[0];
   const absentUserIds = events
     .filter(e => formatDateKey >= e.startDate.split('T')[0] && formatDateKey <= e.endDate.split('T')[0])
-    .filter(e => e.user)
-    .map(e => e.user!.id);
+    .map(e => e.userId);
 
-  let usersPresent = users.filter(u => !absentUserIds.includes(u.id));
-  let usersAbsent = users.filter(u => absentUserIds.includes(u.id));
-
-  // Filtrer par utilisateur sélectionné si ce n'est pas "tous"
-  if (selectedUserId !== 'all') {
-    const selectedId = Number(selectedUserId);
-    usersPresent = usersPresent.filter(u => u.id === selectedId);
-    usersAbsent = usersAbsent.filter(u => u.id === selectedId);
-  }
+  const usersPresent = users.filter(u => !absentUserIds.includes(u.id));
+  const usersAbsent = users.filter(u => absentUserIds.includes(u.id));
 
   return (
     <div className="p-2 md:p-5 w-full max-w-auto mx-auto">
       {/* Navigation */}
       <div className="flex justify-between items-center gap-1 mb-6">
-        <button
-          onClick={() => changeDate(-1)}
-          className="px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200"
-          style={{ borderWidth: "3px" }}
-        >
-          &lt; Précédent
-        </button>
+        <button onClick={() => changeDate(-1)} className="text-[16px] px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200" style={{ borderWidth: "3px" }}>&lt; Précédent</button>
         <h2 className="text-xl font-bold capitalize w-40 text-center">
           {currentDate.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
         </h2>
-        <button onClick={() => changeDate(1)} className="px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200" style={{ borderWidth: "3px" }}>Suivant &gt;</button>
+        <button onClick={() => changeDate(1)} className="text-[16px] px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200" style={{ borderWidth: "3px" }}>Suivant &gt;</button>
         <button
           onClick={() => {
             setTargetDate(new Date().toISOString().split('T')[0]);
             setShowAddModal(true);
           }}
-          className="bg-blue-600 text-white px-3 py-2 rounded font-medium hover:bg-blue-700 transition"
+          className="text-[16px] bg-blue-600 text-white px-3 py-2 rounded font-medium hover:bg-blue-700 transition"
         >
           + Nouvelle Absence
         </button>
@@ -111,13 +65,11 @@ export default function CalendarPage() {
       <div className="overflow-x-auto">
         <CalendarGrid
           date={currentDate}
-          events={events}
+          onDateChange={setCurrentDate}
           view={view}
           onViewChange={setView}
-          onEditEvent={(event: CalendarEvent) => { setSelectedEvent(event); setShowEditModal(true); }}
+          onEditEvent={(event: any) => { setSelectedEvent(event); setShowEditModal(true); }}
           onDayClick={(dateStr: string) => { setTargetDate(dateStr); setShowAddModal(true); }}
-          onUserChange={setSelectedUserId}
-          users={users}
         />
       </div>
       {/* SECTION LÉGENDES ET ÉTAT ÉQUIPE */}
@@ -126,33 +78,33 @@ export default function CalendarPage() {
         {/* État des utilisateurs */}
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-red-500 mb-2">Absents aujourd&apos;hui :</h3>
+            <h3 className="text-[16px] text-sm font-bold text-red-500 mb-2">Absents aujourd'hui :</h3>
             <div className="flex flex-wrap gap-2">
-              {usersAbsent.length > 0 ? usersAbsent.map((u: User) => (
-                <span key={u.id} className="px-2 py-1 text-xs text-white rounded bg-red-100 text-red-800 border " style={{ backgroundColor: u.color }}>
+              {usersAbsent.length > 0 ? usersAbsent.map((u: any) => (
+                <span key={u.id} className="text-[16px] px-2 py-1 text-xs text-white rounded bg-red-100 text-red-800 border " style={{ backgroundColor: u.color }}>
                   {u.firstName} {u.lastName}
                 </span>
-              )) : <span className="text-xs text-gray-400 italic">Aucun absent</span>}
+              )) : <span className="text-[14px] text-xs text-gray-400 italic">Aucun absent</span>}
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-bold text-green-500 mb-2">Présents aujourd&apos;hui :</h3>
+            <h3 className="text-[16px] text-sm font-bold text-green-500 mb-2">Présents aujourd'hui :</h3>
             <div className="flex flex-wrap gap-2">
-              {usersPresent.length > 0 ? usersPresent.map((u: User) => (
+              {usersPresent.length > 0 ? usersPresent.map((u: any) => (
                 <span key={u.id} className="px-2 py-1 text-xs text-white rounded bg-green-100 text-green-800 border" style={{ backgroundColor: u.color }}>
                   {u.firstName} {u.lastName}
                 </span>
-              )) : <span className="text-xs text-gray-400 italic">Tout le monde est absent</span>}
+              )) : <span className="text-[14px] text-xs text-gray-400 italic">Tout le monde est absent</span>}
             </div>
           </div>
         </div>
 
-        {/* Types d&apos;absences */}
+        {/* Types d'absences */}
         <div>
-          <h3 className="text-sm font-bold text-black-500 mb-2">Types d&apos;absences :</h3>
+          <h3 className="text-[16px] text-sm font-bold text-black-500 mb-2">Types d'absences :</h3>
           <div className="flex flex-wrap gap-2">
-            {eventTypes.map((type: EventType) => (
-              <span key={type.id} className="px-2 py-1 text-xs rounded border" style={{ borderColor: type.color, color: type.color }}>
+            {eventTypes.map((type: any) => (
+              <span key={type.id} className="text-[16px] px-2 py-1 text-xs rounded border" style={{ borderColor: type.color, color: type.color }}>
                 {type.label}
               </span>
             ))}
@@ -164,10 +116,9 @@ export default function CalendarPage() {
       {
         showAddModal && (
           <EventModal
-            key={targetDate}
             date={targetDate}
             onClose={() => setShowAddModal(false)}
-            onAdd={fetchEvents}
+            onAdd={() => window.location.reload()}
           />
         )
       }
@@ -176,7 +127,7 @@ export default function CalendarPage() {
           <EditEventModal
             event={selectedEvent}
             onClose={() => setShowEditModal(false)}
-            onRefresh={fetchEvents}
+            onRefresh={() => window.location.reload()}
           />
         )
       }

@@ -1,4 +1,4 @@
-import { CalendarEvent } from '@/lib/types';
+import { CalendarEvent } from "@/types";
 
 export default function EventItem({ event }: { event: CalendarEvent }) {
   const isMorning = new Date(event.startDate).getHours() < 12;

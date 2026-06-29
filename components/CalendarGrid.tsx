@@ -1,67 +1,27 @@
 "use client";
+import { handler } from "next/dist/build/templates/app-route";
 import { useEffect, useState } from "react";
-import { CalendarEvent, User } from '@/lib/types';
+import { CalendarEvent } from "@/types";
 
 export default function CalendarGrid({
   date,
-  events,
   view,
   onViewChange,
   onEditEvent,
   onDayClick,
-  onUserChange,
-  users,
-}: {
-  date: Date;
-  events: CalendarEvent[];
-  view: 'month' | 'week';
-  onViewChange: (view: 'month' | 'week') => void;
-  onEditEvent: (event: CalendarEvent) => void;
-  onDayClick: (dateStr: string) => void;
-  onUserChange?: (userId: string) => void;
-  users: User[];
-}) {
-  //const [events, setEvents] = useState<CalendarEvent[]>([]);
+}: any) {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
-  const [, setRefreshConster] = useState(0);
 
 
   useEffect(() => {
-    //fetch("/api/events").then(res => res.json()).then(setEvents);
-    //fetch("/api/users").then(res => res.json()).then(setUsers);
-
-    let timeoutId: NodeJS.Timeout | undefined;
-    
-    const updateAtMidnight = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-      
-      timeoutId = setTimeout(() => {
-        setRefreshConster(prev => prev + 1);
-        updateAtMidnight(); // Rappel récursif pour chaque jour
-      }, timeUntilMidnight);
-    };
-
-    updateAtMidnight();
-
-    // Fallback: mise à jour chaque minute au cas où
-    const interval = setInterval(() => {
-      setRefreshConster(prev => prev + 1);
-    }, 60000);
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      clearInterval(interval);
-    };
+    fetch("/api/events").then(res => res.json()).then(setEvents);
+    fetch("/api/users").then(res => res.json()).then(setUsers);
   }, [date]);
 
-
   const filteredEvents = events.filter(e =>
-    selectedUserId === 'all' || e.user?.id === Number(selectedUserId)
+    selectedUserId === 'all' || e.userId === Number(selectedUserId)
   );
 
 
@@ -85,11 +45,7 @@ export default function CalendarGrid({
   };
   const weekDays = view === 'week' ? getWeekDates(date) : [];
 
-  const sortByUserLastName = (a: User, b: User) => {
-    return a.lastName.localeCompare(b.lastName);
-  };
-
-  const sortByEventUserLastName = (a: CalendarEvent, b: CalendarEvent) => {
+  const sortByLastName = (a: CalendarEvent, b: CalendarEvent) => {
     const nameA = a.user?.lastName || "";
     const nameB = b.user?.lastName || "";
     return nameA.localeCompare(nameB);
@@ -104,16 +60,13 @@ export default function CalendarGrid({
           <button onClick={() => onViewChange('month')} className={`px-4 py-1 rounded ${view === 'month' ? 'bg-blue-500 text-white' : ''}`}>Mois</button>
           <button onClick={() => onViewChange('week')} className={`px-4 py-1 rounded ${view === 'week' ? 'bg-blue-500 text-white' : ''}`}>Semaine</button>
         </div>
-        <select className="border p-2 rounded" value={selectedUserId} onChange={(e) => {
-          setSelectedUserId(e.target.value);
-          onUserChange?.(e.target.value);
-        }}
+        <select className="border p-2 rounded" value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}
           style={{
             color: selectedUserId != 'all' ? selectedUserColor : undefined,
             borderWidth: "3px"
           }}>
           <option value="all">Tous les utilisateurs</option>
-          {[...users].sort(sortByUserLastName).map(u =>
+          {[...users].sort(sortByLastName).map(u =>
             <option
               key={u.id}
               value={u.id}
@@ -142,13 +95,13 @@ export default function CalendarGrid({
             {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} className="h-32 bg-gray-50" />)}
             {days.map((day) => {
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              return <DayCell key={day} dateStr={dateStr} day={day} events={filteredEvents} onDayClick={onDayClick} onEditEvent={onEditEvent} sortByLastName={sortByEventUserLastName} />;
+              return <DayCell key={day} dateStr={dateStr} day={day} events={filteredEvents} onDayClick={onDayClick} onEditEvent={onEditEvent} sortByLastName={sortByLastName} />;
             })}
           </>
         ) : (
           weekDays.map((d, i) => {
             const dateStr = d.toISOString().split('T')[0];
-            return <DayCell key={i} dateStr={dateStr} day={d.getDate()} events={filteredEvents} onDayClick={onDayClick} onEditEvent={onEditEvent} sortByLastName={sortByEventUserLastName} />;
+            return <DayCell key={i} dateStr={dateStr} day={d.getDate()} events={filteredEvents} onDayClick={onDayClick} onEditEvent={onEditEvent} sortByLastName={sortByLastName} />;
           })
         )}
       </div>
@@ -156,15 +109,15 @@ export default function CalendarGrid({
   );
 }
 
-function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName }: {
-  dateStr: string;
-  day: number;
-  events: CalendarEvent[];
-  onDayClick: (dateStr: string) => void;
-  onEditEvent: (event: CalendarEvent) => void;
-  sortByLastName: (a: CalendarEvent, b: CalendarEvent) => number;
-}) {
+function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName }: { dateStr: string; day: number; events: CalendarEvent[]; onDayClick: (date: string) => void; onEditEvent: (event: CalendarEvent) => void; sortByLastName: (a: CalendarEvent, b: CalendarEvent) => number }) {
   const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+
+  const dayEvents = events.filter((e: CalendarEvent) => {
+    const start = e.startDate.split('T')[0]
+    const end = e.endDate.split('T')[0]
+    return dateStr >= start && dateStr <= end;
+  }).sort(sortByLastName)
 
   return (
     <div
@@ -174,8 +127,8 @@ function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName
         {day}
       </div>
 
-        <div className="grid grid-rows-2 h-full flex-1 space-y-0.5 overflow-y-auto">
-        <div className="border-b border-dashed border-black-900">
+      <div className="grid grid-rows-2 h-full flex-1 space-y-0.5 overflow-x-auto">
+        <div className="border-b border-dashed border-black-900 overflow-y-auto">
           {events.filter((e: CalendarEvent) => {
             const start = e.startDate.split('T')[0];
             const end = e.endDate.split('T')[0];
@@ -198,7 +151,8 @@ function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName
           {events.filter((e: CalendarEvent) => {
             const start = e.startDate.split('T')[0];
             const end = e.endDate.split('T')[0];
-            return (dateStr === start && dateStr < end) || (dateStr > start && dateStr < end) || (dateStr === start && e.startPeriod === 'afternoon') || (dateStr === end && e.endPeriod === 'afternoon')
+            // return (dateStr === start && dateStr < end) || 
+            return (dateStr > start && dateStr < end) || (dateStr === start && e.startPeriod === 'afternoon') || (dateStr === end && e.endPeriod === 'afternoon')
           })
             .sort(sortByLastName)
             .map((e: CalendarEvent) => (

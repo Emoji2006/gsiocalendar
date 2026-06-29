@@ -26,7 +26,7 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
     });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
     return NextResponse.json(
       { error: "Erreur lors de la suppression de l'utilisateur." },
       { status: 500 }

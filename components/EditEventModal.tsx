@@ -1,17 +1,15 @@
 "use client";
 import { useState } from "react";
-import { CalendarEvent, EventFormData } from '@/lib/types';
+import { CalendarEvent } from "@/types";
 
-export default function EditEventModal({ event, onClose, onRefresh }: { event: CalendarEvent; onClose: () => void; onRefresh: () => void }) {
+export default function EditEventModal({ event, onClose, onRefresh }: { event: CalendarEvent, onClose: () => void, onRefresh: () => void }) {
 
   // Initialisation avec la date actuelle au format YYYY-MM-DD
-  const [formData, setFormData] = useState<EventFormData>({
-    userId: event.userId.toString(),
-    eventTypeId: event.eventTypeId.toString(),
+  const [formData, setFormData] = useState({
     startDate: event.startDate.split('T')[0],
-    endDate: event.endDate ? event.endDate.split('T')[0] : event.startDate.split('T')[0],
-    startPeriod: event.startPeriod,
-    endPeriod: event.endPeriod
+    endDate: event.startDate ? event.endDate.split('T')[0] : event.startDate.split('T')[0],
+    startPeriod: 'morning',
+    endPeriod: 'afternoon'
   });
 
   // FONCTION DE SUPPRESSION
@@ -65,7 +63,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-lg font-bold mb-4">Modifier l&apos;absence</h2>
+        <h2 className="text-lg font-bold mb-4">Modifier l'absence</h2>
 
         {/* Date et Période de début */}
         {/*<div className="grid grid-cols-2 gap-2 mb-2">*/}
@@ -80,7 +78,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
 
           <select
             value={formData.startPeriod}
-            onChange={e => setFormData({ ...formData, startPeriod: e.target.value as "morning" | "afternoon" })}
+            onChange={e => setFormData({ ...formData, startPeriod: e.target.value })}
             className="border p-2">
             <option value="morning">Matin</option>
             <option value="afternoon">Après-midi</option>
@@ -98,7 +96,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
           />
           <select
             value={formData.endPeriod}
-            onChange={e => setFormData({ ...formData, endPeriod: e.target.value as "morning" | "afternoon" })}
+            onChange={e => setFormData({ ...formData, endPeriod: e.target.value })}
             className="border p-2">
             <option value="morning">Matin</option>
             <option value="afternoon">Après-midi</option>

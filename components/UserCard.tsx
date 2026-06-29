@@ -1,5 +1,5 @@
 "use client";
-import { User } from '@/lib/types';
+i mport { User } from '@/lib/types';
 
 type UserCardProps = User & { onRefresh: () => void };
 
