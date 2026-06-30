@@ -9,6 +9,6 @@ export async function GET() {
     where: { userId: 1 }, // ID utilisateur à dynamiser
     _count: true,
   });
-  
+
   return NextResponse.json({ types, stats });
 }

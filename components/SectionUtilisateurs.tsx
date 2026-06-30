@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import UserModal from "./UserModal";
 import { User } from '@/lib/types';
@@ -30,7 +29,9 @@ export default function SectionUtilisateurs() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    void (async () => {
+      await fetchUsers();
+    })();
   }, []);
 
   // Fonction pour supprimer un utilisateur

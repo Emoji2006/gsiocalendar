@@ -75,7 +75,7 @@ export default function SectionTypesAbsences() {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Types d&alop;absences</h2>
+      <h2 className="text-xl font-semibold mb-4">Types d&apos;absences</h2>
 
       {/* T4.3 : Affichage des erreurs */}
       {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 border border-red-200">{error}</div>}
@@ -87,14 +87,14 @@ export default function SectionTypesAbsences() {
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           placeholder="Nouveau type"
-          className="border p-1 w-1 rounded flex-grow"
+          className="border p-1 w-1 rounded flex-grow bg-white"
           required
         />
         <input
           type="color"
           value={newColor}
           onChange={(e) => setNewColor(e.target.value)}
-          className="w-10 h-10 p-1 border rounded cursor-pointer"
+          className="w-10 h-10 p-1 border rounded cursor-pointer bg-white"
         />
         <button
           type="submit"
@@ -109,7 +109,7 @@ export default function SectionTypesAbsences() {
         {types.map((type) => (
           <li
             key={type.id}
-            className="flex justify-between items-center p-3 border rounded"
+            className="flex justify-between items-center p-3 border rounded bg-white"
           >
             <div className="flex item-center gap-3">
               <span className="w-6 h-6 rounded-full border border-gray-200" style={{ backgroundColor: type.color }} />

@@ -1,17 +1,18 @@
 "use client";
 import { useState } from "react";
-import { CalendarEvent } from "@/types";
+import { CalendarEvent, EventFormData, Period } from '@/lib/types';
 
-export default function EditEventModal({ event, onClose, onRefresh }: { event: CalendarEvent, onClose: () => void, onRefresh: () => void }) {
+export default function EditEventModal({ event, onClose, onRefresh }: { event: CalendarEvent; onClose: () => void; onRefresh: () => void }) {
 
   // Initialisation avec la date actuelle au format YYYY-MM-DD
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EventFormData>({
+    userId: event.user?.id.toString() || '',
+    eventTypeId: event.eventType?.id.toString() || '',
     startDate: event.startDate.split('T')[0],
-    endDate: event.startDate ? event.endDate.split('T')[0] : event.startDate.split('T')[0],
-    startPeriod: 'morning',
-    endPeriod: 'afternoon'
+    endDate: event.endDate ? event.endDate.split('T')[0] : event.startDate.split('T')[0],
+    startPeriod: event.startPeriod as Period,
+    endPeriod: event.endPeriod as Period
   });
-
   // FONCTION DE SUPPRESSION
   const handleDelete = async () => {
     if (!confirm("Voulez-vous vraiment supprimer cette absence ?")) return;
@@ -39,13 +40,12 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: event.userId,
-          eventTypeId: event.eventTypeId,
+          userId: event.user?.id,
+          eventTypeId: event.eventType?.id,
           startDate: formData.startDate,
           endDate: formData.endDate, // On suppose ici la fin = début pour une absence d'une journée
           startPeriod: formData.startPeriod,
           endPeriod: formData.endPeriod,
-          note: event.note || ""
         }),
       });
 
@@ -63,7 +63,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-lg font-bold mb-4">Modifier l'absence</h2>
+        <h2 className="text-lg font-bold mb-4">Modifier l&apos;absence</h2>
 
         {/* Date et Période de début */}
         {/*<div className="grid grid-cols-2 gap-2 mb-2">*/}
@@ -78,7 +78,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
 
           <select
             value={formData.startPeriod}
-            onChange={e => setFormData({ ...formData, startPeriod: e.target.value })}
+            onChange={e => setFormData({ ...formData, startPeriod: e.target.value as "morning" | "afternoon" })}
             className="border p-2">
             <option value="morning">Matin</option>
             <option value="afternoon">Après-midi</option>
@@ -96,7 +96,7 @@ export default function EditEventModal({ event, onClose, onRefresh }: { event: C
           />
           <select
             value={formData.endPeriod}
-            onChange={e => setFormData({ ...formData, endPeriod: e.target.value })}
+            onChange={e => setFormData({ ...formData, endPeriod: e.target.value as "morning" | "afternoon" })}
             className="border p-2">
             <option value="morning">Matin</option>
             <option value="afternoon">Après-midi</option>

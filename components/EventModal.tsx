@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarEvent } from "@/types";
+import { EventFormData, EventType, User } from '@/lib/types';
 
 export default function EventModal({
   date,
@@ -11,10 +11,10 @@ export default function EventModal({
   onClose: () => void,
   onAdd: () => void
 }) {
-  const [users, setUsers] = useState<CalendarEvent[]>([]);
-  const [types, setTypes] = useState<CalendarEvent[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [types, setTypes] = useState<EventType[]>([]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EventFormData>({
     userId: "",
     eventTypeId: "",
     startDate: date,
@@ -27,10 +27,6 @@ export default function EventModal({
     fetch("/api/users").then(res => res.json()).then(setUsers);
     fetch("/api/event-types").then(res => res.json()).then(setTypes);
   }, []);
-
-  useEffect(() => {
-    setFormData(prev => ({ ...prev, startDate: date, endDate: date }));
-  }, [date]);
 
   const handleSubmit = async () => {
     if (!formData.userId || !formData.eventTypeId) {
@@ -60,12 +56,12 @@ export default function EventModal({
             className="border p-2 rounded w-full outline-none"
             // Bordure colorée selon l'utilisateur sélectionné
             style={{
-              color: users.find(u => u.id == formData.userId)?.color,
+              color: users.find(u => u.id === Number(formData.userId))?.color,
               borderWidth: "2px"
             }}
           >
             <option value="">Sélectionner un utilisateur</option>
-            {users.map((u: CalendarEvent) => (
+            {users.map((u: User) => (
               <option
                 key={u.id}
                 value={u.id}
@@ -89,7 +85,7 @@ export default function EventModal({
             </div>
             <select
               value={formData.startPeriod}
-              onChange={e => setFormData({ ...formData, startPeriod: e.target.value })}
+              onChange={e => setFormData({ ...formData, startPeriod: e.target.value as "morning" | "afternoon" })}
               className="w-full border p-2 mb-2">
               <option value="morning">Matin</option>
               <option value="afternoon">Après-midi</option>
@@ -109,7 +105,7 @@ export default function EventModal({
 
             <select
               value={formData.endPeriod}
-              onChange={e => setFormData({ ...formData, endPeriod: e.target.value })}
+              onChange={e => setFormData({ ...formData, endPeriod: e.target.value as "morning" | "afternoon" })}
               className="border p-2 mb-2">
               <option value="morning">Matin</option>
               <option value="afternoon">Après-midi</option>
@@ -119,16 +115,14 @@ export default function EventModal({
             <select
               value={formData.eventTypeId}
               onChange={(e) => setFormData({ ...formData, eventTypeId: e.target.value })}
-              //className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2"
               className="border p-2 rounded w-full outline-none"
-              // Bordure colorée selon l'utilisateur sélectionné
               style={{
-                color: types.find(u => u.id == formData.eventTypeId)?.color,
+                color: types.find(u => u.id === Number(formData.eventTypeId))?.color,
                 borderWidth: "2px"
               }}
             >
-              <option value="">Type d'absence</option>
-              {types.map((t: CalendarEvent) => (
+              <option value="">Type d&apos;absence</option>
+              {types.map((t: EventType) => (
                 <option
                   key={t.id}
                   value={t.id}

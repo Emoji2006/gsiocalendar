@@ -14,8 +14,9 @@ async function main() {
 
   const defaultTypes = [
     { label: "Congé", color: "#2563eb" },
-    { label: "École", color: "#16a34a" },
+    { label: "Ecole", color: "#16a34a" },
     { label: "Astreinte", color: "#ef4444" },
+    { label: "Malade", color: "#ffa200" },
   ];
 
   for (const type of defaultTypes) {

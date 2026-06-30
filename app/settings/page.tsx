@@ -20,7 +20,7 @@ export default function SettingsPage() {
           onClick={() => setTab('eventTypes')}
           className={`pb-2 ${tab === 'eventTypes' ? 'border-b-2 border-blue-600' : ''}`}
         >
-          Types d'absences
+          Types d&apos;absences
         </button>
       </div>
       {tab === 'users' ? <SectionUtilisateurs /> : <SectionTypesAbsences />}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 // Définition du type pour les paramètres (Next.js 16 - asynchrone)
 type RouteContext = { params: Promise<{ id: string }> };
@@ -26,7 +26,7 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur lors de la suppression de l'utilisateur." },
       { status: 500 }

@@ -37,6 +37,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { userId, eventTypeId, startDate, endDate, startPeriod, endPeriod } = body;
 
+    console.log(startDate)
+    console.log(new Date(startDate))
+    console.log(endDate)
+    console.log(new Date(endDate))
+
     // Validation basique
     if (!userId || !eventTypeId || !startDate || !endDate || !startPeriod || !endPeriod) {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
