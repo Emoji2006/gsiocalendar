@@ -88,7 +88,7 @@ export default function CalendarPage() {
       {/* Navigation */}
       <div className="flex justify-between items-center gap-1 mb-6">
         <button onClick={() => changeDate(-1)} className="text-[16px] px-4 py-2 border rounded bg-gray-200 hover:bg-gray-200" style={{ borderWidth: "3px" }}>&lt; Précédent</button>
-        <h2 className="text-xl font-bold capitalize w-40 text-center">
+        <h2 className="text-[27px] font-bold capitalize w-40 text-center ">
           {currentDate.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
         </h2>
         <button onClick={() => changeDate(1)} className="text-[16px] px-4 py-2 border rounded bg-gray-200 hover:bg-gray-200" style={{ borderWidth: "3px" }}>Suivant &gt;</button>

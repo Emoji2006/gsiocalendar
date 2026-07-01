@@ -126,13 +126,15 @@ export default function CalendarGrid({
         </select>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 ">
+      <div className="grid grid-cols-7 gap-1">
         {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map((d, index) => {
           const todayDayIndex = new Date().getDay();
           const currentDayIndex = todayDayIndex === 0 ? 6 : todayDayIndex - 1;
           const isTodayColumn = index === currentDayIndex;
           return (
-            <div key={d} className={`text-center font-bold p-2 bg-gray-100 border-b-4 ${isTodayColumn ? 'text-red-600' : 'text-gray-800'}`}>
+            <div
+              key={d}
+              className={`text-[20px] text-center font-bold p-2 bg-gray-100 border-b-4 ${isTodayColumn ? 'text-red-600' : 'text-black-600'}`}>
               {d}
             </div>
           );
@@ -140,7 +142,7 @@ export default function CalendarGrid({
 
         {view === 'month' ? (
           <>
-            {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} className="h-32" />)}
+            {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} className="h-auto" />)}
             {days.map((day) => {
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               return <DayCell key={day} dateStr={dateStr} day={day} events={filteredEvents} onDayClick={onDayClick} onEditEvent={onEditEvent} sortByLastName={sortByEventUserLastName} />;
@@ -179,14 +181,14 @@ function DayCell({ dateStr, day, events, onDayClick, onEditEvent, sortByLastName
 
   return (
     <div
-      className="border h-auto w-auto p-1 flex flex-col hover:bg-gray-50 transition cursor-pointer"
+      className="border-3 h-auto w-auto p-1 flex flex-col hover:bg-gray-50 transition cursor-pointer"
       onClick={() => onDayClick(dateStr)}>
-      <div className={`font-semibold text-xs mb-1 ${isToday ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
+      <div className={`text-[14px] font-semibold text-xs mb-1 ${isToday ? 'text-red-600 font-bold' : 'text-black-600'}`}>
         {day}
       </div>
 
       <div className="grid grid-rows-2 h-full flex-1 space-y-0.5 overflow-y-auto">
-        <div className="border-b border-dashed border-black-900">
+        <div className="border-b-2 border-dashed border-black-900">
           {events.filter((e: CalendarEvent) => {
             const start = e.startDate.split('T')[0];
             const end = e.endDate.split('T')[0];
