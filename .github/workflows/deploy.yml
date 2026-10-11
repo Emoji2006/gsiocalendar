@@ -2,7 +2,7 @@ name: Deploy to Raspberry Pi 5
 
 on:
   push:
-    branches: [ main ] # Se d�clenche � chaque push sur la branche main
+    branches: [ main ] # Se déclenche à chaque push sur la branche main
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
     - name: Checkout du code
       uses: actions/checkout@v4
 
-    - name: D�ploiement et Build SSH sur le Pi 5
+    - name: Déploiement et Build SSH sur le Pi 5
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER_IP }}
