@@ -17,7 +17,7 @@ export default function AbsenceStats() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
       {data.types.map((type: EventType) => {
         // T6.4 : Calcul dynamique du compteur via les données groupées de l'API
-        const count = data.stats.find((s: EventTypeStat) => String(s.eventTypeId) === String(type.id))?._count || 0;
+        const count = data.stats.find((s: EventTypeStat) => s.eventTypeId === type.id)?._count || 0;
         
         return (
           <div key={type.id} className="bg-white p-6 rounded-lg shadow border border-gray-100">

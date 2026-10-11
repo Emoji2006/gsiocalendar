@@ -1,15 +1,12 @@
 {
   "name": "gsiocalendar",
   "version": "0.1.0",
-  "homepage": "https://github.io",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d out -nojekyll"
+    "lint": "eslint"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -26,7 +23,6 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "gh-pages": "^6.3.0",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
