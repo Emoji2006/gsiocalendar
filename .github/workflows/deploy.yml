@@ -1,0 +1,26 @@
+name: Deploy to Raspberry Pi 5
+
+on:
+  push:
+    branches: [ main ] # Se d�clenche � chaque push sur la branche main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+
+    - name: D�ploiement et Build SSH sur le Pi 5
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /var/www/html/gsiocalendar
+          git pull origin main
+          npm install
+          npx prisma generate
+          npm run build
+          pm2 restart gsiocalendar || pm2 start npm --name "gsiocalendar" -- run start

@@ -42,12 +42,12 @@ export type CalendarEvent = {
   }
 }
 
-// export type EventTypeStat = {
-//   eventTypeId: number;
-//   count: number;
-// };
+export type EventTypeStat = {
+  eventTypeId: string;
+  _count: number;
+};
 
-// export type AbsenceStatsData = {
-//   types: EventType[];
-//   stats: EventTypeStat[];
-// };
+export type AbsenceStatsData = {
+  types: EventType[];
+  stats: EventTypeStat[];
+};
